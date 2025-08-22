@@ -17,7 +17,6 @@ if [ "$OPTION" != 1 ]; then
     "NextJs" "NextJs Framework" off \
     "NuxtJs" "NuxtJs Framework" off \
     "EmberJs" "EmberJs Framework" off \
-    "BackboneJs" "BackboneJs Framework" off \
     "SemanticUi" "SemanticUi Framework" off \
     "Foundation" "Foundation Framework" off \
         3>&1 1>&2 2>&3 3>&-)
