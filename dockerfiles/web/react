@@ -1,0 +1,23 @@
+# Use Node.js 20 for stability
+FROM node:20
+
+# Set working directory
+WORKDIR /app/react-app
+
+# Clear npm cache to avoid installation issues
+RUN npm cache clean --force
+
+# Set npm registry and increase timeout
+RUN npm config set registry https://registry.npmmirror.com
+RUN npm config set fetch-timeout 600000
+RUN npm config set fetch-retries 5
+RUN npm config set loglevel verbose
+
+# Verify network connectivity to npm registry
+RUN npm ping || { echo 'Cannot reach npm registry'; exit 1; }
+
+# Expose port 5173 for Vite dev server
+EXPOSE 5173
+
+# Create React app and install dependencies
+CMD ["/bin/sh", "-c", "echo 'Checking npm connectivity...'; npm ping || { echo 'Runtime npm registry unreachable'; exit 1; }; if [ ! -f 'package.json' ]; then echo 'Creating Vite app...'; npm create vite@latest . -- --template react --yes --verbose || { echo 'Vite creation failed'; ls -l /app/react-app; exit 1; }; fi; echo 'Installing dependencies...'; npm i --verbose || { echo 'npm install failed'; ls -l /app/react-app; exit 1; }; echo 'Starting Vite server...'; VITE_POLLING=true npm run dev -- --host"]
