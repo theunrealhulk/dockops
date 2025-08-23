@@ -17,8 +17,10 @@ if [ "$OPTION" != 1 ]; then
     "NextJs" "NextJs Framework" off \
     "NuxtJs" "NuxtJs Framework" off \
     "EmberJs" "EmberJs Framework" off \
-    "SemanticUi" "SemanticUi Framework" off \
-    "Foundation" "Foundation Framework" off \
+    "Svelte" "Svelte Framework" off \
+    "Astro" "Astro Framework" off \
+    "SolidJs" "SolidJs Framework" off \
+    "Qwik" "Qwik Framework" off \
         3>&1 1>&2 2>&3 3>&-)
     : ${FRONT_SERVICE:?Error: at least one must be checked. Aborting.}
   fi
