@@ -1,6 +1,13 @@
 FROM node:latest
 WORKDIR /app/vue-app
+# Clear npm cache to avoid installation issues
+RUN npm cache clean --force
 
+# Set npm registry and increase timeout
+RUN npm config set registry https://registry.npmmirror.com
+RUN npm config set fetch-timeout 600000
+RUN npm config set fetch-retries 5
+RUN npm config set loglevel verbose
 
 EXPOSE 5173
 CMD ["/bin/sh", "-c", "echo 'Checking npm connectivity...'; npm ping || { echo 'Runtime npm registry unreachable'; exit 1; }; if [ ! -f 'package.json' ]; then echo 'Creating Vite Vue app...'; npm create vite@latest . -- --template vue --yes --verbose || { echo 'Vite creation failed'; ls -l /app/vue-app; exit 1; }; fi; echo 'Installing dependencies...'; npm i --verbose || { echo 'npm install failed'; ls -l /app/vue-app; exit 1; }; echo 'Starting Vite server...'; CHOKIDAR_USEPOLLING=true CHOKIDAR_INTERVAL=100 npm run dev -- --host"]
