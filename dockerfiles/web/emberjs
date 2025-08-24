@@ -1,0 +1,13 @@
+FROM node:20
+WORKDIR /app/ember-app
+RUN npm cache clean --force
+RUN npm config set registry https://registry.npmmirror.com --global
+RUN npm config set fetch-timeout 600000
+RUN npm config set fetch-retries 5
+RUN npm config set loglevel verbose
+RUN npm config list
+RUN npm ping || { echo 'Cannot reach npm registry'; exit 1; }
+RUN npm install -g ember-cli --verbose
+EXPOSE 4200
+EXPOSE 35729
+CMD ["/bin/sh", "-c", "echo 'Checking npm connectivity...'; npm ping || { echo 'Runtime npm registry unreachable'; exit 1; }; if [ ! -f 'package.json' ]; then echo 'Creating Ember app...'; ember init  || { echo 'Ember creation failed'; ls -l /app/ember-app; exit 1; }; fi; if [ ! -d 'node_modules' ]; then echo 'Installing dependencies...'; npm install --verbose || { echo 'npm install failed'; ls -l /app/ember-app; exit 1; }; fi; echo 'Starting Ember server...'; npm run start -- --host 0.0.0.0 --port 4200 --live-reload-port 35729"]
