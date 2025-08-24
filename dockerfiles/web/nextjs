@@ -1,0 +1,12 @@
+FROM node:20
+WORKDIR /app/nextjs-app
+RUN npm cache clean --force
+RUN npm config set registry https://registry.npmjs.org --global
+RUN npm config set fetch-timeout 600000
+RUN npm config set fetch-retries 5
+RUN npm config set loglevel verbose
+RUN npm config list
+RUN npm ping || { echo 'Cannot reach npm registry, trying fallback...'; npm config set registry https://registry.npmmirror.com; npm ping || { echo 'Cannot reach fallback registry'; exit 1; }; }
+RUN npm install -g create-next-app@15.5.0 --verbose
+EXPOSE 3000
+CMD ["/bin/sh", "-c", "echo 'Checking npm connectivity...'; npm ping || { echo 'Runtime npm registry unreachable, trying fallback...'; npm config set registry https://registry.npmmirror.com; npm ping || { echo 'Runtime fallback registry unreachable'; exit 1; }; }; if [ ! -f 'package.json' ]; then echo 'Creating Next.js app...'; for i in 1 2 3; do npx create-next-app@15.5.0 . --typescript --eslint --tailwind --app --src-dir --no-git --use-npm --yes && break || { echo 'Attempt $i failed'; sleep 2; }; done || { echo 'Next.js creation failed'; ls -l /app/nextjs-app; exit 1; }; fi; if [ ! -d 'node_modules' ]; then echo 'Installing dependencies...'; npm install --verbose || { echo 'npm install failed'; ls -l /app/nextjs-app; exit 1; }; fi; echo 'Starting Next.js server...'; npm run dev -- -H 0.0.0.0 -p 3000"]
