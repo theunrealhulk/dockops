@@ -1,0 +1,12 @@
+FROM node:20
+WORKDIR /app/nuxtjs-app
+RUN npm cache clean --force
+RUN npm config set registry https://registry.npmjs.org --global
+RUN npm config set fetch-timeout 600000
+RUN npm config set fetch-retries 5
+RUN npm config set loglevel verbose
+RUN npm config list
+RUN npm ping || { echo 'Cannot reach npm registry, trying fallback...'; npm config set registry https://registry.npmmirror.com; npm ping || { echo 'Cannot reach fallback registry'; exit 1; }; }
+RUN npm install -g nuxi@3.28.0 --verbose
+EXPOSE 3000
+CMD ["/bin/sh", "-c", "echo 'Checking npm connectivity...'; npm ping || { echo 'Runtime npm registry unreachable, trying fallback...'; npm config set registry https://registry.npmmirror.com; npm ping || { echo 'Runtime fallback registry unreachable'; exit 1; }; }; if [ ! -f 'package.json' ]; then echo 'Creating Nuxt.js app...'; for i in 1 2 3; do npx nuxi@3.28.0 init . --packageManager npm --gitInit false --typescript --force && npm install @nuxtjs/tailwindcss @nuxt/eslint --save-dev --verbose && break || { echo 'Attempt $i failed'; sleep 2; }; done || { echo 'Nuxt.js creation failed'; ls -l /app/nuxtjs-app; exit 1; }; fi; if [ ! -d 'node_modules' ]; then echo 'Installing dependencies...'; npm install --verbose || { echo 'npm install failed'; ls -l /app/nuxtjs-app; exit 1; }; fi; echo 'Starting Nuxt.js server...'; npm run dev -- --host 0.0.0.0 --port 3000"]
